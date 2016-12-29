@@ -45,20 +45,26 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     float vertices[] = {
-         0.0f,  0.5f, // Vertex 1 (X, Y)
-         0.5f, -0.5f, // Vertex 2 (X, Y)
-        -0.5f, -0.5f  // Vertex 3 (X, Y)
+         0.0f,  0.5f, 1.0f, 0.0f, 0.0f, // Vertex 1: Red
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Vertex 2: Green
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f  // Vertex 3: Blue
     };
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Create and compile the vertex shader
     const char* vertexSource = GLSL(
-        in vec2 position;
-        
-        void main() {
-            gl_Position = vec4(position, 0.0, 1.0);
-        }
+
+		in vec2 position;
+		in vec3 color;
+
+		out vec3 Color;
+
+		void main()
+		{
+			Color = color;
+			gl_Position = vec4(position, 0.0, 1.0);
+		}
     );
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -67,11 +73,15 @@ int main()
 
     // Create and compile the fragment shader
     const char* fragmentSource = GLSL(
-        out vec4 outColor;
-        
-        void main() {
-            outColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-        }
+
+		in vec3 Color;
+
+		out vec4 outColor;
+
+		void main()
+		{
+			outColor = vec4(Color, 1.0);
+		}
     );
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -87,10 +97,21 @@ int main()
     glUseProgram(shaderProgram);
 
     // Specify the layout of the vertex data
+#if 0
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
+    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE,
+                           5*sizeof(float), 0);
 
+    GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+    glEnableVertexAttribArray(colAttrib);
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE,
+                           5*sizeof(float), (void*)(2*sizeof(float)));
+#endif
     // ---------------------------- RENDERING ------------------------------ //
 
     while(!glfwWindowShouldClose(window))
