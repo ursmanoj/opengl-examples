@@ -68,11 +68,15 @@ int main()
     // Create and compile the fragment shader
     const char* fragmentSource = GLSL(
         out vec4 outColor;
+
+    	uniform vec3 triangleColor;
         
         void main() {
-            outColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            outColor = vec4(triangleColor, 1.0f);
         }
     );
+
+
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
@@ -86,6 +90,9 @@ int main()
     glLinkProgram(shaderProgram);
     glUseProgram(shaderProgram);
 
+    GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
+    glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
+
     // Specify the layout of the vertex data
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
@@ -95,6 +102,9 @@ int main()
 
     while(!glfwWindowShouldClose(window))
     {
+    	//Compile issue with sin colors, hence just using RED color above to learn 'uniform' concept
+    	//auto t_start = std::chrono::high_resolution_clock::now();
+
 		// Clear the screen to black
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -105,6 +115,11 @@ int main()
         // Swap buffers and poll window events
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        //auto t_now = std::chrono::high_resolution_clock::now();
+        //float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
+
+        //glUniform3f(uniColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0.0f, 0.0f);
     }
 
     // ---------------------------- CLEARING ------------------------------ //
